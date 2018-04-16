@@ -3,7 +3,7 @@ import os
 
 """ checkRoot evaluates there are 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt)
 	checkRoot throws an error if there are not 3 subdirs and 5 files"""
-def checkRoot(r):
+def checkRoot(r): 
 	dirNum = 0
 	fileNum = 0
 	for n_item in os.scandir(r):
