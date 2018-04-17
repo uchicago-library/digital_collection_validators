@@ -9,8 +9,13 @@ dcv checks for the following in a directory:
 	- 5 independent files in the main directory (dc.xml, mets.xml, pdf, struct.text, text)
 	- all files in each subdirectory have the same extension
 	- the number of files in each subdirectory are consistent with each other
+	- tbd: file names are in the right order; none are missing
+	- tbd: outputs an Excel sheet with errors
+	- tbd: check if the inputted directory exists
 
-Although this version of the validator runs on a local machine's command prompt or terminal, no programming experience is required. To run the tool over a directory of OCR data, simply open the machine's command prompt and run the validator by inputting the path of the directory in question.
+If the inputted directory fails any of the above qualifications, dcv raises an error.
+
+Although this version of dcv runs on a local machine's command prompt or terminal, no programming experience is required. To run the tool over a directory of OCR data, simply open the machine's command prompt and run the validator by inputting the path of the directory in question.
 
 # Quickstart
 
@@ -26,3 +31,8 @@ $ git clone git@github.com:uchicago-library/digital_collection_validators
 ```bash
 $ proj1.py -dir <DIRECTORY_PATH>
 ```
+An example, if the folder I want to upload is Presidential Papers Box 68, Folder 108, the prompt will be
+```
+$ proj1.py -dir C:\Users\presworker\samba\prespapers\68\0108
+```
+6. dcv will run through the directory and flag any errors
