@@ -1,16 +1,26 @@
 import argparse
 import os
+# from os import _exit
 
-""" checkRoot evaluates there are 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt)
-	checkRoot throws an error if there are not 3 subdirs and 5 files"""
 def checkRoot(r): 
+	"""Determines the proper number of subdirectories and files
+
+	Checks for 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt) at the top-level of the input directory
+	
+	:param [generator] r: <description of r>
+	
+	:rtype None 
+	"""
 	dirNum = 0
 	fileNum = 0
+	topTypes = ['struct.txt', 'txt', 'pdf']
 	for n_item in os.scandir(r):
 		if n_item.is_dir():
 			dirNum += 1
 		elif n_item.is_file():
 			fileNum += 1
+			fileChoices(topTypes, [n_item], d=None) 
+
 	if dirNum != 3 or fileNum != 5:
 		parser.error('there are not 3 subdirectories and 5 files in this directory')
 
@@ -20,7 +30,7 @@ def fileChoices(fType, fList, d):
 	extDict = {}
 	for f in fList:
 		ext = os.path.splitext(f)[1][1:]
-		if ext != fType:
+		if ext not in fType:
 			parser.error('one of the files in {} does not end with {}'.format(d, fType))
 		if ext in extDict:
 			extDict[ext] += 1
@@ -28,8 +38,6 @@ def fileChoices(fType, fList, d):
 			extDict[ext] = 1
 	return extDict
 	
-
-""" observing """
 parser = argparse.ArgumentParser(description='Checks OCR directory')
 
 def main():
@@ -37,21 +45,25 @@ def main():
 		'-dir', '--directory', action='store', required=True, \
 		default='/tmp/non_existent_dir', help='input OCR data directory path')
 	args = parser.parse_args()
-	args_dict = vars(args)
 	directoryTree = os.walk(args.directory)
 
-	checkRoot(args.directory)
+	try:
+		checkRoot(args.directory)
+		return 0
+	except KeyboardInterrupt:
+		return 131
+
 	for root, dirs, files in directoryTree:
 		for d in dirs:
 			path = os.path.join(root, d)
 			if d == 'ALTO':
-				checker = fileChoices('xml', os.listdir(path), d)
+				checker = fileChoices(['xml'], os.listdir(path), d)
 				numAlto = checker['xml']
 			elif d == 'JPEG':
-				checker = fileChoices('jpg', os.listdir(path), d)
+				checker = fileChoices(['jpg'], os.listdir(path), d)
 				numJPEG = checker['jpg']
 			elif d == 'TIFF':
-				checker = fileChoices('tif', os.listdir(path), d)
+				checker = fileChoices(['tif'], os.listdir(path), d)
 				numTif = checker['tif']
 			else:
 				parser.error('Remove the folder that is not ALTO, JPEG, or TIFF. Suggestion: it could be the PDF \
@@ -68,7 +80,7 @@ def main():
 		return 131
 
 if __name__ == '__main__':
-	main()
+	__exit(main())
 
 
 		# temporary: draws tree for reference
