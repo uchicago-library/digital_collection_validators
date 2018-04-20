@@ -1,35 +1,54 @@
 import argparse
 import os
-# from os import _exit
+from os import _exit
 
 def checkRoot(r): 
-	"""Determines the proper number of subdirectories and files
+	"""Determines the proper number of subdirectories and files.
 
-	Checks for 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt) at the top-level of the input directory
+	Checks for 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt) at the top-level of the input directory.
 	
 	:param [generator] r: <description of r>
 	
 	:rtype None 
 	"""
-	dirNum = 0
-	fileNum = 0
-	topTypes = ['struct.txt', 'txt', 'pdf']
-	for n_item in os.scandir(r):
-		if n_item.is_dir():
-			dirNum += 1
-		elif n_item.is_file():
-			fileNum += 1
-			fileChoices(topTypes, [n_item], d=None) 
+	dirNum, fileNum = 0, 0
+	rIter = os.scandir(r)
+	rList = []
 
-	if dirNum != 3 or fileNum != 5:
-		parser.error('there are not 3 subdirectories and 5 files in this directory')
+	# to do: simplify this into for-loop, possibly
+	try:
+		while True:
+			elem = next(rIter)
+			if elem.is_dir():
+				dirNum += 1
+			elif elem.is_file():
+				fileNum += 1
+				rList.append(elem)
+	except StopIteration:
+		pass
 
-""" fileChoices takes paramaters of extensions (@choices) and a list of child files (@flist). 
-	It traverses fList to see if all files end with choices """
+	extDict = fileChoices(['dc.xml', 'struct.txt', 'mets.xml', 'txt', 'pdf'], rList, os.path.basename(r))
+
+	if not all(value == 1 for value in extDict.values()):
+		parser.error('There is a missing file type from the root directory. Please refer to the Campus Pub \
+			spec sheet for the required OCR data formats.')	
+	elif dirNum != 3 or fileNum != 5:
+		parser.error('This directory does not have 3 subdirectories and 5 files.')
+
+
 def fileChoices(fType, fList, d):
+	""" Traverses a list of files and evaluates whether they all match a file extension.
+
+	:param str fType: a list of string of possible extensions a file can be, depending on its directory.
+
+	:param arr fileChoices: a list of child files in a directory.
+
+	:param [directory]
+
+	"""
 	extDict = {}
 	for f in fList:
-		ext = os.path.splitext(f)[1][1:]
+		ext = os.path.basename(f).split('.', 1)[1:][0]
 		if ext not in fType:
 			parser.error('one of the files in {} does not end with {}'.format(d, fType))
 		if ext in extDict:
@@ -45,13 +64,9 @@ def main():
 		'-dir', '--directory', action='store', required=True, \
 		default='/tmp/non_existent_dir', help='input OCR data directory path')
 	args = parser.parse_args()
-	directoryTree = os.walk(args.directory)
+	directoryTree = os.walk(args.directory) # creates 3-tuple
 
-	try:
-		checkRoot(args.directory)
-		return 0
-	except KeyboardInterrupt:
-		return 131
+	checkRoot(args.directory)
 
 	for root, dirs, files in directoryTree:
 		for d in dirs:
@@ -76,11 +91,13 @@ def main():
 
 	try:
 		return 0
+	except OSError as err:
+		print("OS error: {0}".format(err))
 	except KeyboardInterrupt:
 		return 131
 
 if __name__ == '__main__':
-	__exit(main())
+	main()
 
 
 		# temporary: draws tree for reference
