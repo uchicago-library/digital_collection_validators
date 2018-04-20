@@ -35,9 +35,14 @@ def checkRoot(r):
 	elif dirNum != 3 or fileNum != 5:
 		parser.error('This directory does not have 3 subdirectories and 5 files.')
 
+def mvolIdentifier:
+	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
+
+	""" 
+
 
 def fileChoices(fType, fList, d):
-	""" Traverses a list of files and evaluates whether they all match a file extension.
+	"""Traverses a list of files and evaluates whether they all match a file extension.
 
 	:param str fType: a list of string of possible extensions a file can be, depending on its directory.
 
@@ -81,8 +86,8 @@ def main():
 				checker = fileChoices(['tif'], os.listdir(path), d)
 				numTif = checker['tif']
 			else:
-				parser.error('Remove the folder that is not ALTO, JPEG, or TIFF. Suggestion: it could be the PDF \
-					file that needs removal')
+				parser.error('Remove the folder that is not ALTO, JPEG, or TIFF. Did you extract the PDF from its \
+					subdirectory?')
 
 	if numAlto != numJPEG != numTif:
 		parser.error('The number of files in the subdirectories is inconsistent.')
