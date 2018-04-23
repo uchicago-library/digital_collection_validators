@@ -35,18 +35,37 @@ def checkRoot(r):
 	elif dirNum != 3 or fileNum != 5:
 		parser.error('This directory does not have 3 subdirectories and 5 files.')
 
-def mvolIdentifier:
+def mvolIdentifier(subdir):
 	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
+	
+	Selects the identifier and ensures they all match.
 
+	Grabs the last two characters in the identifier, sorts them, ensures that there aren't any missing pages 
+	by finding the difference between each el and ensuring it == 1. It raises errors otherwise.
+
+	:param generator subdir: an object of all subdirectories
+
+	:rtype None
 	""" 
+	subdirIterator = [list(s) for s in subdir if s.is_file()]
+
+	# check identifier
+	for s in subdirIterator:
+		fullMvol = os.path.basename(s).split('.', 2)[:1][0]
+		identifier = fullMvol[:-5]
+		pagination = fullMvol[-5:]
+
+
+	if len(set(subdirIterator)) > 1:
+		parser.error('One of the identifiers in this folder is inconsistent with the rest.')
 
 
 def fileChoices(fType, fList, d):
 	"""Traverses a list of files and evaluates whether they all match a file extension.
 
-	:param str fType: a list of string of possible extensions a file can be, depending on its directory.
+	:param array fType: a list of string of possible extensions a file can be, depending on its directory.
 
-	:param arr fileChoices: a list of child files in a directory.
+	:param arr fList: a list of child files in a directory.
 
 	:param [directory]
 
@@ -55,7 +74,7 @@ def fileChoices(fType, fList, d):
 	for f in fList:
 		ext = os.path.basename(f).split('.', 1)[1:][0]
 		if ext not in fType:
-			parser.error('one of the files in {} does not end with {}'.format(d, fType))
+			parser.error('one of the files in folder {} does not end with {}'.format(d, fType))
 		if ext in extDict:
 			extDict[ext] += 1
 		else:
