@@ -15,7 +15,6 @@ def checkRoot(r):
 	rIter = os.scandir(r)
 	rList = []
 
-	# to do: simplify this into for-loop, possibly
 	try:
 		while True:
 			elem = next(rIter)
@@ -35,28 +34,39 @@ def checkRoot(r):
 	elif dirNum != 3 or fileNum != 5:
 		parser.error('This directory does not have 3 subdirectories and 5 files.')
 
-def mvolIdentifier(subdir):
+def mvolIdentifier(subdirList, subdirName):
 	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
 	
 	Selects the identifier and ensures they all match.
 
-	Grabs the last two characters in the identifier, sorts them, ensures that there aren't any missing pages 
-	by finding the difference between each el and ensuring it == 1. It raises errors otherwise.
+	Appends last 4 digits of each mvol and ensures that there aren't any missing pages 
+	in a recursive function checkPagination. It raises errors otherwise.
 
-	:param generator subdir: an object of all subdirectories
+	:param list subdirList: an os.listdir of strings
+
+	:param str subdirName: name of subdirectory
 
 	:rtype None
 	""" 
-	subdirIterator = [list(s) for s in subdir if s.is_file()]
+	fullMvol = []
+	pagination = []
 
-	# check identifier
-	for s in subdirIterator:
-		fullMvol = os.path.basename(s).split('.', 2)[:1][0]
-		identifier = fullMvol[:-5]
-		pagination = fullMvol[-5:]
+	for s in subdirList:
+		# if s.is_dir():
+		# 	parser.error('There is a directory named {} in folder {}'.format(s, subdirName))
+		fullMvol.append(os.path.basename(s).split('_', 1)[0])
+		pagination.append(os.path.basename(s).split('_', 1)[1][:4])
 
+	def checkPagination(pList, d):
+		if len(pList) <= 1:
+			return True
+		if abs(int(pList[-1]) - int(pList[-2])) != 1:
+			parser.error('The pagination does not increase or decrease by 1 in {}'.format(d))
+		checkPagination(pList.pop(), d)
 
-	if len(set(subdirIterator)) > 1:
+	checkPagination(pagination, subdirName)
+
+	if len(set(subdirList)) < len(subdirList):
 		parser.error('One of the identifiers in this folder is inconsistent with the rest.')
 
 
@@ -88,33 +98,35 @@ def main():
 		'-dir', '--directory', action='store', required=True, \
 		default='/tmp/non_existent_dir', help='input OCR data directory path')
 	args = parser.parse_args()
-	directoryTree = os.walk(args.directory) # creates 3-tuple
-
-	checkRoot(args.directory)
-
-	for root, dirs, files in directoryTree:
-		for d in dirs:
-			path = os.path.join(root, d)
-			if d == 'ALTO':
-				checker = fileChoices(['xml'], os.listdir(path), d)
-				numAlto = checker['xml']
-			elif d == 'JPEG':
-				checker = fileChoices(['jpg'], os.listdir(path), d)
-				numJPEG = checker['jpg']
-			elif d == 'TIFF':
-				checker = fileChoices(['tif'], os.listdir(path), d)
-				numTif = checker['tif']
-			else:
-				parser.error('Remove the folder that is not ALTO, JPEG, or TIFF. Did you extract the PDF from its \
-					subdirectory?')
-
-	if numAlto != numJPEG != numTif:
-		parser.error('The number of files in the subdirectories is inconsistent.')
-	else:
-		print('hooray! you have the proper number of files with the right number of extensions')
-
+	
 	try:
-		return 0
+		directoryTree = os.walk(args.directory) # creates 3-tuple
+		checkRoot(args.directory)
+		for root, dirs, files in directoryTree:
+			for d in dirs:
+				path = os.path.join(root, d)
+				if d == 'ALTO':
+					checker = fileChoices(['xml'], os.listdir(path), d)
+					numAlto = checker['xml']
+					mvolIdentifier(os.listdir(path), d)
+				elif d == 'JPEG':
+					checker = fileChoices(['jpg'], os.listdir(path), d)
+					numJPEG = checker['jpg']
+					mvolIdentifier(os.listdir(path), d)
+				elif d == 'TIFF':
+					checker = fileChoices(['tif'], os.listdir(path), d)
+					numTif = checker['tif']
+					mvolIdentifier(os.listdir(path), d)
+				else:
+					parser.error('Remove the folder that is not ALTO, JPEG, or TIFF. Did you extract the PDF from its \
+						subdirectory?')
+
+		if numAlto != numJPEG != numTif:
+			parser.error('The number of files in the subdirectories is inconsistent.')
+		else:
+			print('hooray! you have the proper number of files with the right number of extensions')
+			return 0
+
 	except OSError as err:
 		print("OS error: {0}".format(err))
 	except KeyboardInterrupt:
@@ -122,11 +134,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-		# temporary: draws tree for reference
-		# path = root.split(os.sep)
-		# print((len(path) - 1) * '---', os.path.basename(root))
-		# for f in files:
-		# 	print(len(path) * '---', f)
-
