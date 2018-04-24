@@ -2,13 +2,6 @@ import argparse
 import os
 from os import _exit
 
-class readableDir(argparse.Action):
-	def __init__(self, path, exists=True):
-		self.path = path
-		
-	def __call__(self, parser, namespace, values, option_string=None):
-		print('Executing {}'.format(self))
-
 def checkRoot(r): 
 	"""Determines the proper number of subdirectories and files.
 
@@ -103,7 +96,7 @@ def main():
 	parser = argparse.ArgumentParser(description='Checks OCR directory')
 	parser.add_argument(
 		'-dir', '--directory', action='store', required=True, \
-		default='/tmp/non_existent_dir', action=readableDir, help='input OCR data directory path')
+		default='/tmp/non_existent_dir', help='input OCR data directory path')
 	args = parser.parse_args()
 	
 	try:
