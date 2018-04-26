@@ -2,16 +2,8 @@ import argparse
 import os
 from os import _exit
 
-class readableDir(argparse.Action):
-	def __init__(self, path, exists=True):
-		self.path = path
-		
-	def __call__(self, parser, namespace, values, option_string=None):
-		print('Executing {}'.format(self))
-
 def checkRoot(r): 
 	"""Determines the proper number of subdirectories and files.
-
 	Checks for 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt) at the top-level of the input directory.
 	
 	:param [generator] r: <description of r>
@@ -45,14 +37,10 @@ def mvolIdentifier(subdirList, subdirName):
 	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
 	
 	Selects the identifier and ensures they all match.
-
 	Appends last 4 digits of each mvol and ensures that there aren't any missing pages 
 	in a recursive function checkPagination. It raises errors otherwise.
-
 	:param list subdirList: an os.listdir of strings
-
 	:param str subdirName: name of subdirectory
-
 	:rtype None
 	""" 
 	fullMvol = []
@@ -65,27 +53,23 @@ def mvolIdentifier(subdirList, subdirName):
 		pagination.append(os.path.basename(s).split('_', 1)[1][:4])
 
 	def checkPagination(pList, d):
-		if len(pList) <= 1:
+		if len(pList) == 1:
 			return True
 		if abs(int(pList[-1]) - int(pList[-2])) != 1:
 			parser.error('The pagination does not increase or decrease by 1 in {}'.format(d))
-		checkPagination(pList.pop(), d)
+		checkPagination(pList[:-1], d)
 
 	checkPagination(pagination, subdirName)
 
-	if len(set(subdirList)) < len(subdirList):
+	if len(set(fullMvol)) < len(fullMvol):
 		parser.error('One of the identifiers in this folder is inconsistent with the rest.')
 
 
 def fileChoices(fType, fList, d):
 	"""Traverses a list of files and evaluates whether they all match a file extension.
-
 	:param array fType: a list of string of possible extensions a file can be, depending on its directory.
-
 	:param arr fList: a list of child files in a directory.
-
 	:param [directory]
-
 	"""
 	extDict = {}
 	for f in fList:
@@ -98,13 +82,18 @@ def fileChoices(fType, fList, d):
 			extDict[ext] = 1
 	return extDict
 	
+parser = argparse.ArgumentParser(description='Checks OCR directory')
 
 def main():
-	parser = argparse.ArgumentParser(description='Checks OCR directory')
 	parser.add_argument(
 		'-dir', '--directory', action='store', required=True, \
-		default='/tmp/non_existent_dir', action=readableDir, help='input OCR data directory path')
+		default='/tmp/non_existent_dir', help='input OCR data directory path')
 	args = parser.parse_args()
+
+	if exists(args.directory):
+		pass
+	else:
+		raise ValueError('Invalid directory. Please input a real directory.')
 	
 	try:
 		directoryTree = os.walk(args.directory) # creates 3-tuple
