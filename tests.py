@@ -1,5 +1,5 @@
 import os
-import pytest
+import unittest
 import tempfile
 from unittest.mock import patch
 
@@ -25,7 +25,7 @@ class projTests(unittest.TestCase):
 		assert os.listdir(os.getcwd()) == []
 
 	def testCheckRoot(self):
-		response = self.app.getcwd
+		response = self.getcwd()
 		self.assertEqual(re)
 
 	# MVOLIDENTIFIER raises Error
