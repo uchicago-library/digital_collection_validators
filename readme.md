@@ -1,11 +1,11 @@
 # Introduction
 
-## about dcv
+## About dcv
 Digital Collection Validator (dcv) is a validator for multi-volume digitization workflows in the UChicago Library's Preservation Department. It was inspired by the non-normative document I published earlier on developing such a tool.
 
-dcv is a command-line tool that performs quality assessment on directories of multi-volume collection objects before they are deposited into the Library Digital Repository (ownCloud). The purpose is to minimize the manual assessment of a directory's structure and to eliminate any structural errors before it is integrated into ownCloud.
+ dcv performs quality assessment *only* on directories of multi-volume collection objects before they are deposited into the Library Digital Repository (ownCloud). dcv will not work properly for the Library's other collections. The purpose is to minimize the manual assessment of a directory's structure and to eliminate any structural errors before it is integrated into ownCloud. dcv is hosted exclusively on the Command Propmt. 
 
-## dcv's functions
+## dcv's Functions
 dcv checks for the following in a directory:
 
 - existence of directory
@@ -23,7 +23,7 @@ Although this version of dcv runs on a local machine's command prompt or termina
 # Quickstart
 
 1. Open Command Prompt
-  
+
   If you are in the Preservation Department, it is likely you will be working on a Windows machine. In the bottom-left searchbar, type `cmd` and open the Command Prompt.
 2. Download the validator in the Command Prompt
 ```bash
@@ -36,7 +36,7 @@ $ git clone git@github.com:uchicago-library/digital_collection_validators
 $ proj1.py -dir <DIRECTORY_PATH>
 ```
     
-    **Example**: For Presidential Papers Box 68, Folder 108, the prompt might look something like
+  **Example**: For Presidential Papers Box 68, Folder 108, the prompt might look something like
 ```
 $ proj1.py -dir C:\Users\presworker\samba\prespapers\68\0108
 ```
