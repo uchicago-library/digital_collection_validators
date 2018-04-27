@@ -1,42 +1,54 @@
-import pytest
-import tempfile
 import os
+import unittest
+import tempfile
+from unittest.mock import patch
 
-"""Work in progres"""
+# @mock.patch('proj1.listdir')
+# class testPatch(self):
+# 	def test_checkRoot():
+# 		with patch('os.path.isfile', lambda x: True):
+# 			self.assertTrue(checkRoot(self))
+
 
 # creating a fixture
-def cleanDir():
-	newPath = tempfile.mkdtemp()
-	os.chdir(newPath)
+# pytestmark = pytest.mark.usefixtures('cleanDir')
 
-pytestmark = pytest.mark.usefixtures('cleanDir')
+class projTests(unittest.TestCase):
+	def test_foo(self):
+		self.assertTrue(True)
+	
+	def setUp(self):
+		newPath = tempfile.mkdtemp()
+		os.chdir(newPath)
 
-def test_doesSomething(doesSomething):
-	response, msg = doesSomething.ehlo(0)
-	assert response == 250
-	assert 0
-
-
-class ProjTestCase(object):
 	def test_starts_empty(self):
 		assert os.listdir(os.getcwd()) == []
 
-	def setUp(self):
-		self.dir = proj1(newPath)
+	def testCheckRoot(self):
+		response = self.getcwd()
+		self.assertEqual(re)
+
+	# MVOLIDENTIFIER raises Error
+
+
+	# FILECHOICES raises Error
+
+
+	# checks whether directory exists
+
 
 # 	def runTest(self):
 # 		self.assertEqual(self, )
 
-# 	def tearDown(self):
-# 		self.dir.dispose()
-# 		self.dir = None
+
+	def tearDown(self):
+		self.dir.dispose()
+		self.dir = None
 
 
 # def suite():
 # 	tests = ['xTestCase']
 # 	return unittest.TestSuite(map(ProjTestCase))
-
-
 
 if __name__ == '__main__':
 	unittest.main()
