@@ -12,6 +12,10 @@ from unittest.mock import patch
 # creating a fixture
 # pytestmark = pytest.mark.usefixtures('cleanDir')
 
+subdirFiles = ['mvol-0004-1920-0320_0001.xml', 'mvol-0004-1920-0320_0002.xml', 'mvol-0004-1920-0320_0003.xml']
+
+
+
 class projTests(unittest.TestCase):
 	def test_foo(self):
 		self.assertTrue(True)
@@ -23,11 +27,13 @@ class projTests(unittest.TestCase):
 	def test_starts_empty(self):
 		assert os.listdir(os.getcwd()) == []
 
-	def testCheckRoot(self):
-		response = self.getcwd()
-		self.assertEqual(re)
+	def test_checkRoot(self):
+		# response = self.getcwd()
+		# self.assertEqual(re)
 
 	# MVOLIDENTIFIER raises Error
+	def test_mvolIdentifier(self):
+		subdirFiles
 
 
 	# FILECHOICES raises Error

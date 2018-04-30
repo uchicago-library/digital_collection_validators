@@ -104,7 +104,6 @@ def main():
 
 	# logger = logging.getLogger('validator_errors')
 	# logger.setLevel(logging.DEBUG)
-
 	# def logging(arg):
 	# 	while not arg[;]
 
