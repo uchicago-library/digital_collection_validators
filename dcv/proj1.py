@@ -99,7 +99,7 @@ def main():
 	parser = argparse.ArgumentParser(description='Checks OCR directory')
 	parser.add_argument(
 		'-dir', '--directory', action='store', required=True, \
-		default='/tmp/non_existent_dir', help='input OCR data directory path')
+		default='/tmp/non_existent_dir', help='Input OCR data directory path')
 	args = parser.parse_args()
 
 	# logger = logging.getLogger('validator_errors')

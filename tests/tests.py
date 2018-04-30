@@ -9,7 +9,6 @@ from unittest.mock import patch
 # 		with patch('os.path.isfile', lambda x: True):
 # 			self.assertTrue(checkRoot(self))
 
-
 # creating a fixture
 # pytestmark = pytest.mark.usefixtures('cleanDir')
 
