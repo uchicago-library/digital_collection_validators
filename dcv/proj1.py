@@ -19,6 +19,7 @@ def checkRoot(r):
 	dirNum, fileNum = 0, 0
 	rIter = os.scandir(r)
 	rList = []
+	mvols = set()
 
 	try:
 		while True:
@@ -28,17 +29,20 @@ def checkRoot(r):
 			elif elem.is_file():
 				fileNum += 1
 				rList.append(elem)
-
 	except StopIteration:
 		pass
 
 	extDict = fileChoices(['dc.xml', 'struct.txt', 'mets.xml', 'txt', 'pdf'], rList, os.path.basename(r))
-
 	if not all(value == 1 for value in extDict.values()):
 		errorLogs.append('There is a missing file type from the root directory. Please refer to the Campus Pub \
 			spec sheet for the required OCR data formats.')	
 	elif dirNum != 3 or fileNum != 5:
 		errorLogs.append('This directory does not have 3 subdirectories and 5 files.')
+
+	for m in rList:
+		mvols.update(os.path.basename(m).split('_', 1)[0])
+	if len(mvols) != 1:
+		errorLogs.append('The mvol identifiers of files in the root directory require uniformity.')
 
 def mvolIdentifier(subdirList, subdirName):
 	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
@@ -83,16 +87,19 @@ def fileChoices(fType, fList, d):
 	:param [directory]
 	"""
 	extDict = {}
+	print(list(fList)) #fList is an iterator, using scandir
 	for f in fList:
-		# if len(os.path.basename(f).split('.', 1)) <= 2:
-		# 	parser.error('something aint right')
-		ext = os.path.basename(f).split('.', 1)[1:][0]
-		if ext not in fType:
-			errorLogs.append('A file in folder {} does not end with {}.'.format(d, fType))
-		if ext in extDict:
-			extDict[ext] += 1
+		#print(os.path.join(os.path.dirname(os.getcwd())), f)
+		if f.is_dir():
+			errorLogs.append('There is a directory within a subdirectory :^(')
 		else:
-			extDict[ext] = 1
+			ext = os.path.basename(f).split('.', 1)[1:][0]
+			if ext not in fType:
+				errorLogs.append('A file in folder {} does not end with {}.'.format(d, fType))
+			if ext in extDict:
+				extDict[ext] += 1
+			else:
+				extDict[ext] = 1
 	return extDict
 	
 def main():
@@ -101,11 +108,6 @@ def main():
 		'-dir', '--directory', action='store', required=True, \
 		default='/tmp/non_existent_dir', help='Input OCR data directory path')
 	args = parser.parse_args()
-
-	# logger = logging.getLogger('validator_errors')
-	# logger.setLevel(logging.DEBUG)
-	# def logging(arg):
-	# 	while not arg[;]
 
 	if os.path.isdir(args.directory):
 		pass
@@ -118,17 +120,18 @@ def main():
 		for root, dirs, files in directoryTree:
 			for d in dirs:
 				path = os.path.join(root, d)
+				scanPath = os.scandir(path)
 				if d == 'ALTO':
-					numAlto = fileChoices(['xml'], os.listdir(path), d)['xml']
-					mvolIdentifier(os.listdir(path), d)
+					numAlto = fileChoices(['xml'], scanPath, d)['xml']
+					mvolIdentifier(scanPath, d)
 				elif d == 'JPEG':
-					numJPEG = fileChoices(['jpg'], os.listdir(path), d)['jpg']
-					mvolIdentifier(os.listdir(path), d)
+					numJPEG = fileChoices(['jpg'], scanPath, d)['jpg']
+					mvolIdentifier(scanPath, d)
 				elif d == 'TIFF':
-					numTif = fileChoices(['tif'], os.listdir(path), d)['tif']
-					mvolIdentifier(os.listdir(path), d)
+					numTif = fileChoices(['tif'], scanPath, d)['tif']
+					mvolIdentifier(scanPath, d)
 				else:
-					errorLogs.append('Please remove the folder that is not ALTO, JPEG, or TIFF. \
+					errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. \
 						Note: PDF should not have a folder.')
 		if (numAlto * 3) != numAlto + numJPEG + numTif:
 			errorLogs.append('The number of files in the subdirectories is inconsistent.')
