@@ -1,9 +1,8 @@
 import argparse
 import os
-# import traceback
-# import sys
 import logging
 import time
+from copy import copy, deepcopy
 from os import _exit
 
 errorLogs = []
@@ -20,7 +19,6 @@ def checkRoot(r):
 	rIter = os.scandir(r)
 	rList = []
 	mvols = set()
-
 	try:
 		while True:
 			elem = next(rIter)
@@ -40,11 +38,11 @@ def checkRoot(r):
 		errorLogs.append('This directory does not have 3 subdirectories and 5 files.')
 
 	for m in rList:
-		mvols.update(os.path.basename(m).split('_', 1)[0])
+		mvols.add(os.path.basename(m).split('.', 1)[0])
 	if len(mvols) != 1:
 		errorLogs.append('The mvol identifiers of files in the root directory require uniformity.')
 
-def mvolIdentifier(subdirList, subdirName):
+def mvolIdentifier(pt, subdirName):
 	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
 	
 	Selects the identifier and ensures they all match.
@@ -58,21 +56,24 @@ def mvolIdentifier(subdirList, subdirName):
 	:param str subdirName: name of subdirectory
 	:rtype None
 	""" 
+	subdirList = os.scandir(pt)
 	fullMvol = []
 	pagination = []
 
 	for s in subdirList:
-		# if s.is_dir():
-		# 	parser.error('There is a directory named {} in folder {}'.format(s, subdirName))
-		fullMvol.append(os.path.basename(s).split('_', 1)[0])
-		pagination.append(os.path.basename(s).split('_', 1)[1][:4])
+		if s.is_file():
+			fullMvol.append(os.path.basename(s).split('_', 1)[0])
+			pagination.append(os.path.basename(s).split('_', 1)[1][:4])
 
 	def checkPagination(pList, d):
-		if len(pList) == 1:
-			return True
-		if abs(int(pList[-1]) - int(pList[-2])) != 1:
-			errorLogs.append('The pagination does not increase or decrease by 1 in {}.'.format(d))
-		checkPagination(pList[:-1], d)
+		try:
+			if len(pList) == 1:
+				return True
+			if abs(int(pList[-1]) - int(pList[-2])) != 1:
+				errorLogs.append('The pagination does not increase or decrease by 1 in {}.'.format(d))
+			checkPagination(pList[:-1], d)
+		except IndexError:
+			raise ValueError('***Attention***: Please remove the subdirectory in {}.'.format(d))
 
 	if len(set(fullMvol)) != 1:
 		errorLogs.append('An mvol identifier in folder {} is inconsistent with the rest.'.format(subdirName))
@@ -87,11 +88,11 @@ def fileChoices(fType, fList, d):
 	:param [directory]
 	"""
 	extDict = {}
-	print(list(fList)) #fList is an iterator, using scandir
+
 	for f in fList:
-		#print(os.path.join(os.path.dirname(os.getcwd())), f)
 		if f.is_dir():
-			errorLogs.append('There is a directory within a subdirectory :^(')
+			errorLogs.append('There is a directory within subdirectory {}. Please remove it ' \
+				'so testing can resume.'.format(d))
 		else:
 			ext = os.path.basename(f).split('.', 1)[1:][0]
 			if ext not in fType:
@@ -100,6 +101,7 @@ def fileChoices(fType, fList, d):
 				extDict[ext] += 1
 			else:
 				extDict[ext] = 1
+
 	return extDict
 	
 def main():
@@ -123,13 +125,13 @@ def main():
 				scanPath = os.scandir(path)
 				if d == 'ALTO':
 					numAlto = fileChoices(['xml'], scanPath, d)['xml']
-					mvolIdentifier(scanPath, d)
+					mvolIdentifier(path, d)
 				elif d == 'JPEG':
 					numJPEG = fileChoices(['jpg'], scanPath, d)['jpg']
-					mvolIdentifier(scanPath, d)
+					mvolIdentifier(path, d)
 				elif d == 'TIFF':
 					numTif = fileChoices(['tif'], scanPath, d)['tif']
-					mvolIdentifier(scanPath, d)
+					mvolIdentifier(path, d)
 				else:
 					errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. \
 						Note: PDF should not have a folder.')
@@ -140,11 +142,11 @@ def main():
 		currentTime = time.strftime('%I:%M%p on %b %d, %Y', localTime)
 		if len(errorLogs) == 0:
 			print(' -------------- RESULTS FROM VALIDATOR TOOL -------------- ')
-			print('            Test run', currentTime, '          ')
+			print('            Test ran', currentTime, '          ')
 			print('               OCR data passed all tests!')
 		else:
 			print(' -------------- RESULTS FROM VALIDATOR TOOL -------------- ')
-			print('            Test', currentTime, '          ')
+			print('            Test ran', currentTime, '          ')
 			print('\n'.join([error for error in errorLogs]))
 		return 0
 	except OSError as err:
