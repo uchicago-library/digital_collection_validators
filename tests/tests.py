@@ -1,7 +1,7 @@
 import os
 import unittest
 import tempfile
-from unittest.mock import patch
+
 
 # @mock.patch('proj1.listdir')
 # class testPatch(self):
@@ -17,26 +17,21 @@ subdirFiles = ['mvol-0004-1920-0320_0001.xml', 'mvol-0004-1920-0320_0002.xml', '
 
 
 class projTests(unittest.TestCase):
-	def test_foo(self):
-		self.assertTrue(True)
-	
 	def setUp(self):
 		newPath = tempfile.mkdtemp()
 		os.chdir(newPath)
 
-	def test_starts_empty(self):
-		assert os.listdir(os.getcwd()) == []
-
 	def test_checkRoot(self):
-		# response = self.getcwd()
-		# self.assertEqual(re)
+
 
 	# MVOLIDENTIFIER raises Error
 	def test_mvolIdentifier(self):
-		subdirFiles
+		test_object = subdirFiles
+		test_
 
 
 	# FILECHOICES raises Error
+	def test_fileChoices(self):
 
 
 	# checks whether directory exists
