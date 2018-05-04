@@ -1,0 +1,149 @@
+import os
+import time
+import argparse
+from os import _exit
+
+errorLogs = []
+
+class validateDir(argparse.Action):
+	def __init__(self, exists=True, type='dir', dash_ok=True):
+		try:
+			# do something with self
+		except OSError as err:
+			print("OS error: {0}".format(err))
+
+	def __call__(self, parser, namespace, values, option_string=None):
+		self.foo = foo
+		self.bar = bar
+
+	def __iter__(self):
+		return self
+
+	def __next__(self):
+		return self.next()
+
+
+def main():
+	parser = argparse.ArgumentParser(description='Checks OCR directory')
+	parser.add_argument(
+		'-dir', '--directory', action='store', required=True, \
+		default='/tmp/non_existent_dir', help='Input OCR data directory path')
+	args = parser.parse_args()
+
+	try:
+		directoryTree = os.walk(args.directory)
+		checkRoot(args.directory)
+
+		treetime = directoryTree.__next__()
+		root = treetime[0]
+		dirs = treetime[1]
+		fils = treetime[2]
+
+		print('here is the root', root)
+		print('here are the dirs', dirs)
+		print('here are the fils', fils)
+		print(len(treetime))
+
+		# for root, dirs, files in directoryTree:
+		# 	for d in dirs:
+		# 		path = os.path.join(root, d)
+		# 		scanPath = os.scandir(path)
+		# 		if d == 'ALTO':
+		# 			numAlto = fileChoices(['xml'], scanPath, d)['xml']
+		# 			mvolIdentifier(path, d)
+		# 		elif d == 'JPEG':
+		# 			numJPEG = fileChoices(['jpg'], scanPath, d)['jpg']
+		# 			mvolIdentifier(path, d)
+		# 		elif d == 'TIFF':
+		# 			numTif = fileChoices(['tif'], scanPath, d)['tif']
+		# 			mvolIdentifier(path, d)
+		# 		else:
+		# 			errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. \
+		# 				Note: PDF should not have a folder.')
+		# if (numAlto * 3) != numAlto + numJPEG + numTif:
+		# 	errorLogs.append('The number of files in the subdirectories is inconsistent.')
+
+		localTime = time.localtime()
+		currentTime = time.strftime('%I:%M%p on %b %d, %Y', localTime)
+		if len(errorLogs) == 0:
+			print(' -------------- RESULTS FROM VALIDATOR TOOL -------------- ')
+			print('            Test ran', currentTime, '          ')
+			print('               OCR data passed all tests!')
+		else:
+			print(' -------------- RESULTS FROM VALIDATOR TOOL -------------- ')
+			print('            Test ran', currentTime, '          ')
+			print('\n'.join([error for error in errorLogs]))
+		return 0
+	except OSError as err:
+		print("OS error: {0}".format(err))
+	except KeyboardInterrupt:
+		return 131
+
+if __name__ == '__main__':
+	_exit(main())
+
+
+
+
+def mvolIdentifier(pt, subdirName):
+	"""Evaluates whether 1) all mvol identifiers match and 2) their pagination is consistent
+	
+	Selects the identifier and ensures they all match.
+
+	Appends last 4 digits of each mvol and ensures that there aren't any missing pages 
+	in a recursive function checkPagination. 
+
+	func checkPagination confirms the subdirectory's pagination monotonically increases or decreases.
+
+	:param list subdirList: an os.listdir of strings
+	:param str subdirName: name of subdirectory
+	:rtype None
+	""" 
+	subdirList = os.scandir(pt)
+	fullMvol = []
+	pagination = []
+
+	for s in subdirList:
+		if s.is_file():
+			fullMvol.append(os.path.basename(s).split('_', 1)[0])
+			pagination.append(os.path.basename(s).split('_', 1)[1][:4])
+
+	def checkPagination(pList, d):
+		try:
+			if len(pList) == 1:
+				return True
+			if abs(int(pList[-1]) - int(pList[-2])) != 1:
+				errorLogs.append('The pagination does not increase or decrease by 1 in {}.'.format(d))
+			checkPagination(pList[:-1], d)
+		except IndexError:
+			raise ValueError('***Attention***: Please remove the subdirectory in {}.'.format(d))
+
+	if len(set(fullMvol)) != 1:
+		errorLogs.append('An mvol identifier in folder {} is inconsistent with the rest.'.format(subdirName))
+
+	checkPagination(pagination, subdirName)
+
+def fileChoices(fType, fList, d):
+	"""Traverses a list of files and evaluates whether they all match a file extension.
+	
+	:param array fType: a list of string of possible extensions a file can be, depending on its directory.
+	:param arr fList: a list of child files in a directory.
+	:param [directory]
+	"""
+	extDict = {}
+
+	for f in fList:
+		if f.is_dir():
+			errorLogs.append('There is a directory within subdirectory {}. Please remove it ' \
+				'so testing can resume.'.format(d))
+		else:
+			ext = os.path.basename(f).split('.', 1)[1:][0]
+			if ext not in fType:
+				errorLogs.append('A file in folder {} does not end with {}.'.format(d, fType))
+			if ext in extDict:
+				extDict[ext] += 1
+			else:
+				extDict[ext] = 1
+
+	return extDict
+	
