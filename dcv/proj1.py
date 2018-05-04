@@ -117,24 +117,35 @@ def main():
 	try:
 		directoryTree = os.walk(args.directory)
 		checkRoot(args.directory)
-		for root, dirs, files in directoryTree:
-			for d in dirs:
-				path = os.path.join(root, d)
-				scanPath = os.scandir(path)
-				if d == 'ALTO':
-					numAlto = fileChoices(['xml'], scanPath, d)['xml']
-					mvolIdentifier(path, d)
-				elif d == 'JPEG':
-					numJPEG = fileChoices(['jpg'], scanPath, d)['jpg']
-					mvolIdentifier(path, d)
-				elif d == 'TIFF':
-					numTif = fileChoices(['tif'], scanPath, d)['tif']
-					mvolIdentifier(path, d)
-				else:
-					errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. \
-						Note: PDF should not have a folder.')
-		if (numAlto * 3) != numAlto + numJPEG + numTif:
-			errorLogs.append('The number of files in the subdirectories is inconsistent.')
+
+		treetime = directoryTree.__next__()
+		root = treetime[0]
+		dirs = treetime[1]
+		fils = treetime[2]
+
+		print('here is the root', root)
+		print('here are the dirs', dirs)
+		print('here are the fils', fils)
+		print(len(treetime))
+
+		# for root, dirs, files in directoryTree:
+		# 	for d in dirs:
+		# 		path = os.path.join(root, d)
+		# 		scanPath = os.scandir(path)
+		# 		if d == 'ALTO':
+		# 			numAlto = fileChoices(['xml'], scanPath, d)['xml']
+		# 			mvolIdentifier(path, d)
+		# 		elif d == 'JPEG':
+		# 			numJPEG = fileChoices(['jpg'], scanPath, d)['jpg']
+		# 			mvolIdentifier(path, d)
+		# 		elif d == 'TIFF':
+		# 			numTif = fileChoices(['tif'], scanPath, d)['tif']
+		# 			mvolIdentifier(path, d)
+		# 		else:
+		# 			errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. \
+		# 				Note: PDF should not have a folder.')
+		# if (numAlto * 3) != numAlto + numJPEG + numTif:
+		# 	errorLogs.append('The number of files in the subdirectories is inconsistent.')
 
 		localTime = time.localtime()
 		currentTime = time.strftime('%I:%M%p on %b %d, %Y', localTime)
