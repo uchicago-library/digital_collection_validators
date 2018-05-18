@@ -58,7 +58,6 @@ def fileChoices(fType, d):
 				extDict[ext] += 1
 			else:
 				extDict[ext] = 1
-	print(extDict)
 	return extDict
 
 def mvolIdentifier(r):
@@ -87,9 +86,8 @@ def mvolIdentifier(r):
 		checkPagination(pList[:-1], d)
 	checkPagination(pagination, r)
 
-
 def parseArgs(args):
-	# Builds argparse parser to receive input
+	# Builds argparse parser
 	parser = argparse.ArgumentParser(description='Checks OCR directory')
 	parser.add_argument(
 		'-dir', '--directory', action='store', required=True, default=os.getcwd(), help='Input OCR data directory path')
@@ -117,7 +115,6 @@ def main():
 			:param list dList: list of expected extension objects, acceptableDirs
 			:param str pName: name of directory
 			"""
-
 			if len(dList) == 1 and dList[0]['name'] != pName:
 				errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. ')
 				return
