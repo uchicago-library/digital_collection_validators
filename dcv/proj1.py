@@ -118,7 +118,7 @@ def main():
 			if len(dList) == 1 and dList[0]['name'] != pName:
 				errorLogs.append('Please remove or rename the folder that is not ALTO, JPEG, or TIFF. ')
 				return
-			cur = dList[len(dList) -1]
+			cur = dList[-1]
 			if pName == '0108':
 				checkRoot(r)
 				return

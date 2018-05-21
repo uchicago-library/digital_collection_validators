@@ -3,20 +3,10 @@ import unittest
 import argparse
 import tempfile
 import shutil
+import sys
 from dcv.proj1 import main, parseArgs, fileChoices, checkRoot, mvolIdentifier
 
 # def main():
-# 	sysDir = tempfile.gettempdir()
-# 	testDir = os.path.join(sysDir, 'testdir')
-# 	testDir = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
-# 	altoDir = tempfile.mkdtemp(suffix=None, prefix='ALTO', dir= testDir)
-# 	jpgDir = tempfile.mkdtemp(suffix=None, prefix='JPEG', dir= testDir)
-# 	tifDir = tempfile.mkdtemp(suffix=None, prefix='TIFF', dir= testDir)
-
-# 	tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1920-0108_0001', dir=altoDir)
-# 	tempfile.mkstemp(suffix='.jpg', prefix='mvol-0004-1920-0108_0001', dir=jpgDir)
-# 	tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1920-0108_0001', dir=tifDir)
-
 # 	def list_files(startpath):
 # 		for root, dirs, files in os.walk(startpath):
 # 			level = root.replace(startpath, '').count(os.sep)
@@ -42,29 +32,55 @@ class projTests(unittest.TestCase):
 		self.jDir = tempfile.mkdtemp(suffix=None, prefix='JPEG', dir= self.mainDir)
 		self.tDir = tempfile.mkdtemp(suffix=None, prefix='TIFF', dir= self.mainDir)
 
-		tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1920-0108_0001', dir=self.aDir)
-		tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1920-0108_0002', dir=self.aDir)		
-		tempfile.mkstemp(suffix='.jpg', prefix='mvol-0004-1920-0108_0001', dir=self.jDir)
-		tempfile.mkstemp(suffix='.jpg', prefix='mvol-0004-1920-0108_0002', dir=self.jDir)
-		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1920-0108_0001', dir=self.tDir)
-		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1920-0108_0002', dir=self.tDir)
 
-	# def test_main(self):
-	# 	self.assertEqual(main(), 'ok')
-	# 	self.assertEqual(main(), )
+		tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1922-0108_0001', dir=self.mainDir)
+		# break with out of order ALTO
+		tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1922-0108_0002', dir=self.aDir)		
+		tempfile.mkstemp(suffix='.jpg', prefix='mvol-0004-1922-0108_0001', dir=self.jDir)
+		tempfile.mkstemp(suffix='.jpg', prefix='mvol-0004-1922-0108_0002', dir=self.jDir)
+		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1922-0108_0001', dir=self.tDir)
+		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1922-0108_0002', dir=self.tDir)
+
+	def test_stdout(self):
+		class MyOutput(object):
+			def __init__(self):
+				self.data = []
+			def write(self, s):
+				self.data.append(s)
+			def __str__(self):
+				return "".join(self.data)
+
+		stdout_org = sys.stdout
+		my_stdout = MyOutput()
+		try:
+			sys.stdout = my_stdout
+			fn_print(2)
+		finally:
+			sys.stdout = stdout_org
+		self.assertEquals( str(my_stdout), "abab\n")
 
 	def test_fileChoices(self):
-		result = fileChoices(['.xml', '.dc.xml', '.pdf', '.struct.text', '.text'], self.mainDir)
-		# assert result is {'dc.xml': 1, 'mets.xml': 1, 'pdf': 1, 'struct.txt': 1, 'txt': 1}
-		self.assertEqual(fileChoices(['.xml'], self.aDir), {'xml': 1})
+		result = fileChoices(['.xml'], self.aDir)['xml']
+		self.assertEqual(result, 1)
+
 	def checkRoot(self):
 		firstFunction = checkRoot()
 		firstFunction.self.mainDir()
 		assert frustration.status == 'changed correctly'
 		result = checkRoot(self.mainDir)
-		self.assertEqual(result, )
+		# self.assertEqual(result, ) test for a console logged item
+
 	def tearDown(self):
-		shutil.rmtree(self.mainDir)
+		try:
+			shutil.rmtree(self.mainDir)
+			shutil.rmtree(self.aDir)
+			shutil.rmtree(self.jDir)
+			shutil.rmtree(self.tDir)
+			os.remove(os.getcwd())
+		except IOError as e:
+			print('IOError')
+		else:
+			os.remove(os.getcwd())
 
 if __name__ == '__main__':
 	unittest.main()
