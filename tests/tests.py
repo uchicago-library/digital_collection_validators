@@ -2,9 +2,10 @@ import os
 import unittest
 import argparse
 import tempfile
+import io
 import shutil
 import sys
-from dcv.proj1 import main, parseArgs, fileChoices, checkRoot, mvolIdentifier
+from dcv.proj1 import main, buildParser, identifyMvol, evaluateFileNames, checkRoot
 
 # def main():
 # 	def list_files(startpath):
@@ -27,11 +28,13 @@ class projTests(unittest.TestCase):
 		'''
 		sysDir = tempfile.gettempdir()
 		testDir = os.path.join(sysDir, 'testdir')
-		self.mainDir = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
-		self.aDir = tempfile.mkdtemp(suffix=None, prefix='ALTO', dir= self.mainDir)
-		self.jDir = tempfile.mkdtemp(suffix=None, prefix='JPEG', dir= self.mainDir)
-		self.tDir = tempfile.mkdtemp(suffix=None, prefix='TIFF', dir= self.mainDir)
+		self.errorLog = []
 
+		self.mainDir = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
+		self.aDir = tempfile.mkdtemp(suffix=None, prefix='ALTO', dir=self.mainDir)
+		self.jDir = tempfile.mkdtemp(suffix=None, prefix='JPEG', dir=self.mainDir)
+		self.tDir = tempfile.mkdtemp(suffix=None, prefix='TIFF', dir=self.mainDir)
+		self.rDir = tempfile.mkdtemp(suffix=None, prefix='RANDOM', dir=self.mainDir)
 
 		tempfile.mkstemp(suffix='.xml', prefix='mvol-0004-1922-0108_0001', dir=self.mainDir)
 		# break with out of order ALTO
@@ -41,34 +44,16 @@ class projTests(unittest.TestCase):
 		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1922-0108_0001', dir=self.tDir)
 		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1922-0108_0002', dir=self.tDir)
 
-	def test_stdout(self):
-		class MyOutput(object):
-			def __init__(self):
-				self.data = []
-			def write(self, s):
-				self.data.append(s)
-			def __str__(self):
-				return "".join(self.data)
+	def test_checkRoot(self):
+		result = checkRoot(self.mainDir)
+		sys.stderr.write(repr(result))
+		self.errorLog.append(result)
 
-		stdout_org = sys.stdout
-		my_stdout = MyOutput()
-		try:
-			sys.stdout = my_stdout
-			fn_print(2)
-		finally:
-			sys.stdout = stdout_org
-		self.assertEquals( str(my_stdout), "abab\n")
 
-	def test_fileChoices(self):
-		result = fileChoices(['.xml'], self.aDir)['xml']
+	def test_evaluateFileNames(self):
+		result = evaluateFileNames(['.xml'], self.aDir)['xml']
 		self.assertEqual(result, 1)
 
-	def checkRoot(self):
-		firstFunction = checkRoot()
-		firstFunction.self.mainDir()
-		assert frustration.status == 'changed correctly'
-		result = checkRoot(self.mainDir)
-		# self.assertEqual(result, ) test for a console logged item
 
 	def tearDown(self):
 		try:
@@ -84,3 +69,4 @@ class projTests(unittest.TestCase):
 
 if __name__ == '__main__':
 	unittest.main()
+
