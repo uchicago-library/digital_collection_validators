@@ -28,7 +28,6 @@ class projTests(unittest.TestCase):
 		'''
 		sysDir = tempfile.gettempdir()
 		testDir = os.path.join(sysDir, 'testdir')
-		self.errorLog = []
 
 		self.mainDir = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
 		self.aDir = tempfile.mkdtemp(suffix=None, prefix='ALTO', dir=self.mainDir)
@@ -45,10 +44,9 @@ class projTests(unittest.TestCase):
 		tempfile.mkstemp(suffix='.tif', prefix='mvol-0004-1922-0108_0002', dir=self.tDir)
 
 	def test_checkRoot(self):
-		result = checkRoot(self.mainDir)
-		sys.stderr.write(repr(result))
-		self.errorLog.append(result)
-
+		result = checkRoot(self.mainDir, [])
+		expected = ['The number of files in the subdirectories is inconsistent. Please remove the missing or extra file.']
+		self.assertEqual(result, expected)
 
 	def test_evaluateFileNames(self):
 		result = evaluateFileNames(['.xml'], self.aDir)['xml']
