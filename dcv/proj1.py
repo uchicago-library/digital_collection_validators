@@ -12,6 +12,11 @@ from os import _exit
 	- to append to longer errorLogs in main
 '''
 
+''' TO DO - 5/29 ----------------------------------------
+	- return statement line 129 - checkDirectory needs to
+	  fix all return statements to return tuple
+'''
+
 def checkRoot(r, rootLog): 
 	"""Determines the proper number of subdirectories and files.
 	Checks for 3 subdirs (ALTO, JPEG, TIFF) and 5 files (xml, pdf, txt) at the top-level of the input directory.
@@ -32,17 +37,18 @@ def checkRoot(r, rootLog):
 			rList.append(elem)
 			mvolIdentifierSet.add(os.path.basename(elem).split('.', 1)[0])
 
-	extensionDict, evalErrors = evaluateFileNames(rChoices, rList, ())[0], evaluateFileNames(rChoices, rList, ())[1]
-	print(type(evalErrors)) # must change evalErrors so it's also a tuple
-	rootLog += (evalErrors)
+	# extensionDict, evalErrors = evaluateFileNames(rChoices, rList, ())[0], evaluateFileNames(rChoices, rList, ())[1]
+	# print(evalErrors) # must change evalErrors so it's also a tuple
+	# rootLog += (evalErrors,)
 
-	if len(mvolIdentifierSet) != 1:
-		rootLog = rootLog + ('The mvol identifiers of files in the root directory require uniformity.')
+	# if len(mvolIdentifierSet) != 1:
+	# 	rootLog = rootLog + ('The mvol identifiers of files in the root directory require uniformity.')
 	if dirNum != 3 or fileNum != 5:
-		rootLog += ('The root directory does not have 3 subdirectories and 5 files.')
-	elif not all(value == 1 for value in extensionDict.values()):
-		rootLog += ('There is a missing file type from the root directory. Please refer ' \
-			'to the Campus Pub spec sheet for the required OCR data formats.')
+		rootLog = rootLog + ('The root directory does not have 3 subdirectories and 5 files.',)
+	# elif not all(value == 1 for value in extensionDict.values()):
+	# 	rootLog += ('There is a missing file type from the root directory. Please refer ' \
+	# 		'to the Campus Pub spec sheet for the required OCR data formats.')
+	print('here is the riit ', rootLog)
 	return rootLog
 
 def evaluateFileNames(fType, d, newErrors):
@@ -90,10 +96,10 @@ def identifyMvol(r, mvolLog):
 		if len(pList) == 1:
 			return newErrors
 		if abs(int(pList[-1]) - int(pList[-2])) != 1:
-			newErrors += ('The pagination does not increase or decrease by 1 in {}.'.format(d))
+			newErrors += ('The pagination does not increase or decrease by 1 in {}.'.format(d),)
 		countPagination(pList[:-1], d, newErrors)
 
-	mvolLog += (countPagination(pagination, r, ()))
+	mvolLog += (countPagination(pagination, r, ()),)
 
 	if len(set(fullMvol)) != 1:
 		mvolLog += ('An mvol identifier in folder {} is inconsistent with the rest.'.format(r))
@@ -112,23 +118,28 @@ def checkDirectory(r, dList, pName, checked, newErrors):
 	:param str pName: name of directory
 	"""
 	if checked:
-		return newErrors
-	if len(dList) == 1 and dList[0]['name'] != pName:
-		newErrors = newErrors + ('Please remove or rename the folder that is not ALTO, JPEG, or TIFF.')
-		checked = True
+		print('this new error from root is about to go', newErrors)
+		return 1+6
+	# if len(dList) == 1 and dList[0]['name'] != pName:
+	# 	newErrors = newErrors + ('Please remove or rename the folder that is not ALTO, JPEG, or TIFF.',)
+	# 	checked = True
+	if len(dList) == 0:
+		return 1+6
 	cur = dList[-1]
 	if pName == '0108':
 		checkRootResult = checkRoot(r, ())
-		newErrors = newErrors + (checkRootResult)
+		print(checkRootResult)
+		newErrors = newErrors + (checkRootResult,)
 		checked = True
-	elif cur['name'] == pName:
-		ext = cur['extension']
-		evaluatedNames = evaluateFileNames([ext], r, ())
-		numF, errorList = evaluatedNames[0][ext], evaluatedNames[1]
-		newErrors = newErrors + (errorList)
-		cur.update({'num': numF})
-		newErrors = newErrors + (identifyMvol(r, ()))
-		checked = True
+		return 1+6 # it's returning here !!
+	# elif cur['name'] == pName:
+	# 	ext = cur['extension']
+	# 	evaluatedNames = evaluateFileNames([ext], r, ())
+	# 	numF, errorList = evaluatedNames[0][ext], evaluatedNames[1]
+	# 	newErrors = newErrors + (errorList)
+	# 	cur.update({'num': numF})
+	# 	newErrors = newErrors + (identifyMvol(r, ()))
+	# 	checked = True
 	checkDirectory(r, dList[:-1], pName, checked, newErrors)
 
 def main():
@@ -149,12 +160,18 @@ def main():
 
 		for root, dirs, files in directoryTree:
 			pathName = root[-4:].upper()
-			checkDirectoryResult = checkDirectory(root, acceptableDirs, pathName, False, ())
-			errorLog.append(checkDirectoryResult)
+			# checkDirectoryResult = checkDirectory(root, acceptableDirs, pathName, False, ())# checkDirectory(root, acceptableDirs, pathName, False, ())
+			# errorLog.append(checkDirectoryResult)
+			print(checkDirectory(root, acceptableDirs, pathName, False, ()))
 
-		if (acceptableDirs[0]['num'] * 3) != sum([(i['num']) for i in acceptableDirs if 'extension' in i and 'num' in i]):
-			errorLog.append(('The number of files in the subdirectories is inconsistent. Please remove the ' \
-			'missing or extra file.'))
+		# for root, dirs, files in directoryTree:
+		# 	pathName = root[-4:].upper()
+		# 	checkDirectoryResult = checkDirectory(root, acceptableDirs, pathName, False, ())
+		# 	errorLog.append(checkDirectoryResult)
+
+		# if (acceptableDirs[0]['num'] * 3) != sum([(i['num']) for i in acceptableDirs if 'extension' in i and 'num' in i]):
+		# 	errorLog.append(('The number of files in the subdirectories is inconsistent. Please remove the ' \
+		# 	'missing or extra file.'))
 
 		currentTime = time.strftime('%I:%M%p on %b %d, %Y', time.localtime())
 
@@ -167,7 +184,7 @@ def main():
 		else:
 			print(' ============== RESULTS FROM VALIDATOR TOOL ============== ')
 			print('            Test ran', currentTime, '          ')
-			print('\n'.join([error for error in errorLog if error is not None]))
+			print('\n'.join([error[0] for error in errorLog if error is not None]))
 		return 0
 	except OSError as err:
 		print("OS error: {0}".format(err))
